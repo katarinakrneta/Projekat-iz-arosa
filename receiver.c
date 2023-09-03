@@ -10,20 +10,20 @@
 #define MAKS_VELICINA_PORUKE 2000
 
 int main() {
-    const char *imeCijevi = "/tmp/chat_cijev";
-    sem_t *semforPosiljaoca, *semforPrimaoca;
+    const char *imeCevi = "/tmp/chat_cev";
+    sem_t *semaforPosiljaoca, *semaforPrimaoca;
 
-    // Otvaranje imenovane cijevi
-    int cijev_fd = open(imeCijevi, O_RDONLY);
-    if (cijev_fd == -1) {
-        perror("Greška pri otvaranju cijevi za čitanje");
+    // Otvaranje imenovane cevi
+    int cev_fd = open(imeCevi, O_RDONLY);
+    if (cev_fd == -1) {
+        perror("Greška pri otvaranju cevi za čitanje");
         exit(EXIT_FAILURE);
     }
 
     // Inicijalizacija semafora
-    semforPosiljaoca = sem_open("/chat_posiljaoc_semfor", O_CREAT, 0644, 1);
-    semforPrimaoca = sem_open("/chat_primaoc_semfor", O_CREAT, 0644, 1);
-    if (semforPosiljaoca == SEM_FAILED || semforPrimaoca == SEM_FAILED) {
+    semaforPosiljaoca = sem_open("/chat_posiljaoc_semafor", O_CREAT, 0644, 1);
+    semaforPrimaoca = sem_open("/chat_primaoc_semafor", O_CREAT, 0644, 1);
+    if (semaforPosiljaoca == SEM_FAILED || semaforPrimaoca == SEM_FAILED) {
         perror("Greška pri inicijalizaciji semafora");
         exit(EXIT_FAILURE);
     }
@@ -32,20 +32,20 @@ int main() {
 
     while (1) {
         // Čekanje na semafor primaoca
-        sem_wait(semforPrimaoca);
+        sem_wait(semaforPrimaoca);
 
-        // Čitanje poruke iz cijevi
-        ssize_t procitanoBajtova = read(cijev_fd, primljenaPoruka, MAKS_VELICINA_PORUKE);
+        // Čitanje poruke iz cevi
+        ssize_t procitanoBajtova = read(cev_fd, primljenaPoruka, MAKS_VELICINA_PORUKE);
         if (procitanoBajtova > 0) {
             printf("Primljena poruka: %s", primljenaPoruka);
         }
 
         // Oslobađanje semafora pošiljaoca
-        sem_post(semforPosiljaoca);
+        sem_post(semaforPosiljaoca);
     }
 
-    close(cijev_fd);
-    sem_close(semforPosiljaoca);
-    sem_close(semforPrimaoca);
+    close(cev_fd);
+    sem_close(semaforPosiljaoca);
+    sem_close(semaforPrimaoca);
     return 0;
 }
