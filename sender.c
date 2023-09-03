@@ -10,24 +10,24 @@
 #define MAKS_VELICINA_PORUKE 2000
 
 int main() {
-    const char *imeCijevi = "/tmp/chat_cijev";
-    sem_t *semforPosiljaoca, *semforPrimaoca;
+    const char *imeCevi = "/tmp/chat_cev";
+    sem_t *semaforPosiljaoca, *semaforPrimaoca;
 
     // Definicija i inicijalizacija semafora
-    semforPosiljaoca = sem_open("/chat_posiljaoc_semfor", O_CREAT, 0644, 1);
-    semforPrimaoca = sem_open("/chat_primaoc_semfor", O_CREAT, 0644, 1);
-    if (semforPosiljaoca == SEM_FAILED || semforPrimaoca == SEM_FAILED) {
+    semaforPosiljaoca = sem_open("/chat_posiljaoc_semafor", O_CREAT, 0644, 1);
+    semaforPrimaoca = sem_open("/chat_primaoc_semafor", O_CREAT, 0644, 1);
+    if (semaforPosiljaoca == SEM_FAILED || semaforPrimaoca == SEM_FAILED) {
         perror("Greška pri inicijalizaciji semafora");
         exit(EXIT_FAILURE);
     }
 
-    // Kreiranje imenovane cijevi (FIFO)
-    mkfifo(imeCijevi, 0644);
+    // Kreiranje imenovane cevi (FIFO)
+    mkfifo(imeCevi, 0644);
 
-    // Otvaranje cijevi za pisanje
-    int cijev_fd = open(imeCijevi, O_WRONLY);
-    if (cijev_fd == -1) {
-        perror("Greška pri otvaranju cijevi za pisanje");
+    // Otvaranje cevi za pisanje
+    int cev_fd = open(imeCevi, O_WRONLY);
+    if (cev_fd == -1) {
+        perror("Greška pri otvaranju cevi za pisanje");
         exit(EXIT_FAILURE);
     }
 
@@ -39,17 +39,17 @@ int main() {
         fgets(poruka, MAKS_VELICINA_PORUKE, stdin);
 
         // Čekanje na semafor pošiljaoca
-        sem_wait(semforPosiljaoca);
+        sem_wait(semaforPosiljaoca);
 
         // Pisanje poruke u cijev
-        write(cijev_fd, poruka, strlen(poruka) + 1);
+        write(cev_fd, poruka, strlen(poruka) + 1);
 
         // Oslobađanje semafora primaoca
-        sem_post(semforPrimaoca);
+        sem_post(semaforPrimaoca);
     }
 
-    close(cijev_fd);
-    sem_close(semforPosiljaoca);
-    sem_close(semforPrimaoca);
+    close(cev_fd);
+    sem_close(semaforPosiljaoca);
+    sem_close(semaforPrimaoca);
     return 0;
 }
